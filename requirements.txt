@@ -1,0 +1,11 @@
+# Paquets Python utilisés par les outils des kits et des projets (Python 3.11+ ; testé avec 3.14)
+pillow>=11
+numpy>=2
+py65>=1.2          # émulation 6502 (simulateurs C64)
+pygame-ce>=2.5     # Barbarian HD, éditeurs, prévisualisations
+capstone>=5        # désassemblage
+z80dis>=1.0        # désassemblage Z80
+skoolkit>=10       # émulation/désassemblage Z80 (ZX, CPC, VG5000)
+customtkinter>=5   # interfaces graphiques (éditeurs)
+pyinstaller>=6     # Barbarian HD : fabrication du .exe
+zxbasic>=1.18      # Boriel ZX Basic (première version de ZX Tennis seulement)

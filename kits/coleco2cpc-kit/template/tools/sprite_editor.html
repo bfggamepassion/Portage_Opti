@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Éditeur de sprites CPC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg: #16181d; --panel: #1f2229; --panel2: #272b34; --line: #363b47;
+  --text: #e6e8ee; --muted: #9aa1b1; --accent: #ffcc33; --ok: #5bd17a; --err: #ff6b6b;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, "Segoe UI", sans-serif; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+header h1 { font-size: 16px; margin: 0 12px 0 0; }
+header .dirty { color: var(--accent); font-size: 13px; }
+button, select, input { font: inherit; color: var(--text); background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; }
+button { cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button.primary { background: #3a3220; border-color: var(--accent); color: var(--accent); }
+input[type=number] { width: 58px; padding: 3px 6px; }
+main { display: grid; grid-template-columns: 250px minmax(420px, 1fr) minmax(360px, 1fr); gap: 14px; padding: 14px 16px; }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; min-width: 0; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+.list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: calc(100vh - 150px); overflow: auto; padding-right: 4px; }
+.thumb { background: var(--panel2); border: 2px solid transparent; border-radius: 8px; padding: 5px 2px 3px; text-align: center; cursor: pointer; font-size: 11px; color: var(--muted); }
+.thumb canvas { display: block; margin: 0 auto 3px; image-rendering: pixelated; }
+.thumb.sel { border-color: var(--accent); color: var(--text); }
+.thumb.mod::after { content: " ●"; color: var(--accent); }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0; }
+.editwrap { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+#grid { cursor: crosshair; image-rendering: pixelated; border: 1px solid var(--line); touch-action: none; }
+.side canvas { image-rendering: pixelated; border: 1px solid var(--line); display: block; margin-bottom: 4px; }
+.cap { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+#prev { image-rendering: pixelated; border: 1px solid var(--line); cursor: pointer; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+td, th { padding: 3px 4px; text-align: left; }
+th { color: var(--muted); font-weight: 500; }
+tr.front td:first-child { color: var(--accent); }
+#log { white-space: pre-wrap; font: 12px/1.35 Consolas, monospace; background: #111317; border: 1px solid var(--line); border-radius: 8px; padding: 8px; max-height: 180px; overflow: auto; margin-top: 10px; color: var(--muted); }
+#log.ok { color: var(--ok); } #log.err { color: var(--err); }
+.help { font-size: 12px; color: var(--muted); }
+kbd { background: var(--panel2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-size: 11px; }
+@media (max-width: 1100px) { main { grid-template-columns: 1fr; } .list { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); max-height: 260px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Éditeur de sprites (CPC)</h1>
+  <button class="primary" id="bSave">Enregistrer</button>
+  <button id="bBuild">Enregistrer + compiler</button>
+  <button id="bRun">Lancer dans Caprice32</button>
+  <span class="dirty" id="dirty"></span>
+</header>
+
+<main>
+  <section>
+    <h2>Motifs</h2>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section>
+    <h2 id="title">Motif</h2>
+    <div class="editwrap">
+      <canvas id="grid"></canvas>
+      <div class="side">
+        <canvas id="orig"></canvas>
+        <div class="cap">Original Coleco (16 × 16)</div>
+        <canvas id="auto"></canvas>
+        <div class="cap">Conversion automatique</div>
+        <label class="help"><input type="checkbox" id="ghost" checked> Voir l'original en transparence</label>
+      </div>
+    </div>
+    <div class="row">
+      <button id="bUndo" title="Ctrl+Z">Annuler</button>
+      <button id="bMirror">Miroir</button>
+      <button id="bL">←</button><button id="bR">→</button><button id="bU">↑</button><button id="bD">↓</button>
+      <button id="bClear">Tout effacer</button>
+    </div>
+    <div class="row">
+      <button id="bAuto">Repartir de la conversion auto</button>
+      <button id="bRevert">Rétablir l'original</button>
+    </div>
+    <p class="help">Clic gauche : dessiner · clic droit : effacer (glisser pour peindre) · <kbd>Ctrl</kbd>+<kbd>Z</kbd> : annuler.<br>
+    Un pixel CPC du mode 0 est deux fois plus large que haut : la grille le montre comme à l'écran.
+    Un motif n'a qu'une couleur ; la couleur vient du jeu (voir l'aperçu).</p>
+  </section>
+
+  <section>
+    <h2>Aperçu</h2>
+    <div class="row">
+      <select id="preset"></select>
+      <label><input type="checkbox" id="mirror"> Vers la gauche</label>
+      <select id="bg">
+        <option value="#000000">Fond noir</option>
+        <option value="#808080" selected>Route</option>
+        <option value="#008000">Herbe</option>
+        <option value="#0000ff">Eau</option>
+      </select>
+    </div>
+    <canvas id="prev"></canvas>
+    <canvas id="prevSmall" style="image-rendering:pixelated;margin-left:10px;vertical-align:bottom;border:1px solid var(--line)"></canvas>
+    <p class="help">Cliquer sur l'aperçu sélectionne le motif touché. Calques du premier plan au fond :</p>
+    <table><thead><tr><th>#</th><th>Motif</th><th>Couleur</th><th>dx</th><th>dy</th><th></th></tr></thead><tbody id="layers"></tbody></table>
+    <div class="row"><button id="bAddLayer">Ajouter un calque</button></div>
+    <div id="log">Chargement…</div>
+  </section>
+</main>
+
+<script>
+'use strict';
+let D = null;            // données du serveur
+let cur = 0;             // motif sélectionné (index)
+let work = {};           // index -> 16 lignes de 8 caractères (dessins en cours)
+let saved = '';          // état enregistré (JSON) pour détecter les modifications
+let undo = [];
+let layers = [];
+const $ = id => document.getElementById(id);
+const CW = 40, CH = 20;  // cellule de la grille (pixel CPC 2:1)
+
+function log(msg, cls) { const l = $('log'); l.textContent = msg; l.className = cls || ''; }
+function ink(c) {                    // texte lisible sur une couleur
+  const v = parseInt(c.slice(1), 16), l = ((v >> 16) & 255) * .3 + ((v >> 8) & 255) * .59 + (v & 255) * .11;
+  return l > 140 ? '#000' : '#fff';
+}
+const hex2 = n => '$' + n.toString(16).toUpperCase().padStart(2, '0');
+
+// conversion automatique : une paire de pixels Coleco allumée si l'un l'est
+function autoRows(p) {
+  return p.orig.map(r => { let s = ''; for (let k = 0; k < 8; k++) s += ((r >> (14 - 2 * k)) & 3) ? '#' : '.'; return s; });
+}
+const rowsOf = i => work[i] || autoRows(D.patterns[i]);
+const mirrorRows = rows => rows.map(r => [...r].reverse().join(''));
+
+function idxOfN(n) {                 // n VRAM -> [index, miroir]
+  for (let i = 0; i < D.patterns.length; i++) if (D.patterns[i].n === n) return [i, false];
+  if (n >= 0x5C && n <= 0xB4) return [(n - 0x5C) / 4, true];   // miroirs fabriqués par le jeu
+  return [-1, false];
+}
+function state() { const o = {}; for (const i in work) o[D.patterns[i].addr] = work[i]; return JSON.stringify(o); }
+function markDirty() {
+  const d = state() !== saved;
+  $('dirty').textContent = d ? '● modifications non enregistrées' : '';
+  return d;
+}
+
+// ---- liste des motifs ----
+function drawPat(cv, rows, sx, sy, color, bg) {
+  cv.width = 8 * sx; cv.height = 16 * sy;
+  const c = cv.getContext('2d');
+  c.fillStyle = bg; c.fillRect(0, 0, cv.width, cv.height);
+  c.fillStyle = color;
+  rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === '#') c.fillRect(x * sx, y * sy, sx, sy); }));
+}
+function buildList() {
+  const L = $('list'); L.innerHTML = '';
+  D.patterns.forEach((p, i) => {
+    const d = document.createElement('div');
+    d.className = 'thumb' + (i === cur ? ' sel' : '') + (work[i] ? ' mod' : '');
+    const cv = document.createElement('canvas');
+    drawPat(cv, rowsOf(i), 6, 3, '#e6e8ee', '#111317');
+    d.appendChild(cv);
+    d.appendChild(document.createTextNode(hex2(p.n)));
+    d.onclick = () => select(i);
+    L.appendChild(d);
+  });
+}
+function refreshThumb(i) {
+  const d = $('list').children[i];
+  d.className = 'thumb' + (i === cur ? ' sel' : '') + (work[i] ? ' mod' : '');
+  drawPat(d.querySelector('canvas'), rowsOf(i), 6, 3, '#e6e8ee', '#111317');
+}
+
+// ---- éditeur ----
+function patColor(i) {
+  for (const l of layers) { const [j] = idxOfN(l[0]); if (j === i) return D.palette[l[1]]; }
+  return '#e6e8ee';
+}
+function drawGrid() {
+  const cv = $('grid'); cv.width = 8 * CW; cv.height = 16 * CH;
+  const c = cv.getContext('2d');
+  c.fillStyle = '#0d0f12'; c.fillRect(0, 0, cv.width, cv.height);
+  const col = patColor(cur);
+  rowsOf(cur).forEach((r, y) => [...r].forEach((ch, x) => {
+    if (ch === '#') { c.fillStyle = col; c.fillRect(x * CW, y * CH, CW, CH); }
+  }));
+  if ($('ghost').checked) {        // original en transparence (pixels Coleco)
+    c.fillStyle = 'rgba(255,255,255,0.28)';
+    D.patterns[cur].orig.forEach((r, y) => { for (let x = 0; x < 16; x++) if (r & (0x8000 >> x)) c.fillRect(x * CW / 2 + CW / 8, y * CH + CH / 4, CW / 4, CH / 2); });
+  }
+  c.strokeStyle = '#2b303b'; c.lineWidth = 1;
+  for (let x = 0; x <= 8; x++) { c.beginPath(); c.moveTo(x * CW + .5, 0); c.lineTo(x * CW + .5, cv.height); c.stroke(); }
+  for (let y = 0; y <= 16; y++) { c.beginPath(); c.moveTo(0, y * CH + .5); c.lineTo(cv.width, y * CH + .5); c.stroke(); }
+  c.strokeStyle = '#4a5160';
+  c.beginPath(); c.moveTo(4 * CW + .5, 0); c.lineTo(4 * CW + .5, cv.height); c.moveTo(0, 8 * CH + .5); c.lineTo(cv.width, 8 * CH + .5); c.stroke();
+}
+function drawSide() {
+  const p = D.patterns[cur];
+  const o = $('orig'); o.width = 16 * 8; o.height = 16 * 8;
+  const c = o.getContext('2d'); c.fillStyle = '#0d0f12'; c.fillRect(0, 0, 128, 128); c.fillStyle = '#e6e8ee';
+  p.orig.forEach((r, y) => { for (let x = 0; x < 16; x++) if (r & (0x8000 >> x)) c.fillRect(x * 8, y * 8, 8, 8); });
+  drawPat($('auto'), autoRows(p), 16, 8, '#e6e8ee', '#0d0f12');
+}
+function select(i) {
+  cur = i;
+  const p = D.patterns[i];
+  $('title').textContent = `Motif ${hex2(p.n)} — ROM $${p.addr}` + (work[i] ? ' (redessiné)' : ' (conversion automatique)');
+  [...$('list').children].forEach((d, j) => d.classList.toggle('sel', j === i));
+  drawGrid(); drawSide();
+}
+function pushUndo() { undo.push([cur, work[cur] ? work[cur].slice() : null]); if (undo.length > 200) undo.shift(); }
+function setRows(rows, i = cur) {
+  work[i] = rows;
+  refreshThumb(i); drawGrid(); drawPreview(); markDirty();
+  $('title').textContent = `Motif ${hex2(D.patterns[i].n)} — ROM $${D.patterns[i].addr} (redessiné)`;
+}
+
+let painting = null;
+function cellAt(e) {
+  const r = $('grid').getBoundingClientRect();
+  const x = Math.floor((e.clientX - r.left) / (r.width / 8)), y = Math.floor((e.clientY - r.top) / (r.height / 16));
+  return (x >= 0 && x < 8 && y >= 0 && y < 16) ? [x, y] : null;
+}
+function paint(e) {
+  const c = cellAt(e); if (!c) return;
+  const rows = rowsOf(cur).slice();
+  const [x, y] = c;
+  const ch = painting === 'on' ? '#' : '.';
+  if (rows[y][x] === ch) return;
+  rows[y] = rows[y].slice(0, x) + ch + rows[y].slice(x + 1);
+  setRows(rows);
+}
+$('grid').addEventListener('contextmenu', e => e.preventDefault());
+$('grid').addEventListener('pointerdown', e => {
+  pushUndo(); painting = e.button === 2 ? 'off' : 'on';
+  $('grid').setPointerCapture(e.pointerId); paint(e);
+});
+$('grid').addEventListener('pointermove', e => { if (painting) paint(e); });
+$('grid').addEventListener('pointerup', () => { painting = null; });
+$('ghost').onchange = drawGrid;
+
+function edit(fn) { pushUndo(); setRows(fn(rowsOf(cur).slice())); }
+$('bMirror').onclick = () => edit(mirrorRows);
+$('bL').onclick = () => edit(rs => rs.map(r => r.slice(1) + '.'));
+$('bR').onclick = () => edit(rs => rs.map(r => '.' + r.slice(0, 7)));
+$('bU').onclick = () => edit(rs => rs.slice(1).concat(['........']));
+$('bD').onclick = () => edit(rs => ['........'].concat(rs.slice(0, 15)));
+$('bClear').onclick = () => edit(rs => rs.map(() => '........'));
+$('bAuto').onclick = () => edit(() => autoRows(D.patterns[cur]));
+$('bRevert').onclick = () => {
+  pushUndo(); delete work[cur];
+  refreshThumb(cur); select(cur); drawPreview(); markDirty();
+};
+function doUndo() {
+  const u = undo.pop(); if (!u) return;
+  const [i, rows] = u;
+  if (rows) work[i] = rows; else delete work[i];
+  refreshThumb(i); select(i); drawPreview(); markDirty();
+}
+$('bUndo').onclick = doUndo;
+document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); doUndo(); } });
+
+// ---- aperçu ----
+const PS = 6;           // échelle de l'aperçu (pixel Coleco)
+function composition() {
+  const mir = $('mirror').checked;
+  const W = Math.max(...layers.map(l => l[2])) + 16;
+  return layers.map(l => {
+    const [i, m0] = idxOfN(l[0]);
+    if (i < 0) return null;
+    let rows = rowsOf(i); if (m0 !== mir) rows = mirrorRows(rows);
+    const dx = mir ? W - 16 - l[2] : l[2];
+    return { i, rows, color: D.palette[l[1]], cx: Math.floor(dx / 2), y: l[3] };
+  }).filter(Boolean);
+}
+function drawPreview() {
+  if (!D) return;
+  const comp = composition();
+  const Wc = Math.max(...comp.map(c => c.cx + 8)) + 2, H = Math.max(...comp.map(c => c.y + 16)) + 2;
+  for (const [id, s] of [['prev', PS], ['prevSmall', 2]]) {
+    const cv = $(id); cv.width = Wc * 2 * s; cv.height = H * s;
+    const c = cv.getContext('2d');
+    c.fillStyle = $('bg').value; c.fillRect(0, 0, cv.width, cv.height);
+    for (const l of comp.slice().reverse()) {       // du fond au premier plan
+      c.fillStyle = l.color;
+      l.rows.forEach((r, y) => [...r].forEach((ch, x) => {
+        if (ch === '#') c.fillRect((l.cx + x + 1) * 2 * s, (l.y + y + 1) * s, 2 * s, s);
+      }));
+    }
+  }
+}
+$('prev').onclick = e => {
+  const r = $('prev').getBoundingClientRect();
+  const px = Math.floor((e.clientX - r.left) / (r.width / $('prev').width) / (2 * PS)) - 1;
+  const py = Math.floor((e.clientY - r.top) / (r.height / $('prev').height) / PS) - 1;
+  for (const l of composition()) {                   // calque le plus en avant touché
+    const x = px - l.cx, y = py - l.y;
+    if (x >= 0 && x < 8 && y >= 0 && y < 16 && l.rows[y][x] === '#') { select(l.i); return; }
+  }
+};
+function buildLayers() {
+  const T = $('layers'); T.innerHTML = '';
+  layers.forEach((l, k) => {
+    const tr = document.createElement('tr'); if (k === 0) tr.className = 'front';
+    const opts = D.patterns.map(p => `<option value="${p.n}" ${p.n === l[0] ? 'selected' : ''}>${hex2(p.n)}</option>`).join('');
+    const cols = D.palette.map((c, i) => `<option value="${i}" ${i === l[1] ? 'selected' : ''} style="background:${c};color:${ink(c)}">${i}</option>`).join('');
+    tr.innerHTML = `<td>${k + 1}</td><td><select>${opts}</select></td><td><select>${cols}</select></td>` +
+      `<td><input type="number" value="${l[2]}" min="0" max="48"></td><td><input type="number" value="${l[3]}" min="0" max="48"></td><td><button title="Supprimer">✕</button></td>`;
+    const [sN, sC] = tr.querySelectorAll('select'), [iX, iY] = tr.querySelectorAll('input');
+    sC.style.background = D.palette[l[1]]; sC.style.color = ink(D.palette[l[1]]);
+    sN.onchange = () => { l[0] = +sN.value; drawPreview(); drawGrid(); };
+    sC.onchange = () => { l[1] = +sC.value; sC.style.background = D.palette[l[1]]; sC.style.color = ink(D.palette[l[1]]); drawPreview(); drawGrid(); };
+    iX.oninput = () => { l[2] = +iX.value || 0; drawPreview(); };
+    iY.oninput = () => { l[3] = +iY.value || 0; drawPreview(); };
+    tr.querySelector('button').onclick = () => { layers.splice(k, 1); buildLayers(); drawPreview(); };
+    T.appendChild(tr);
+  });
+}
+$('preset').onchange = () => { layers = JSON.parse(JSON.stringify(D.presets[+$('preset').value][1])); buildLayers(); drawPreview(); drawGrid(); };
+$('mirror').onchange = drawPreview;
+$('bg').onchange = drawPreview;
+$('bAddLayer').onclick = () => { layers.push([D.patterns[cur].n, 15, 0, 0]); buildLayers(); drawPreview(); };
+
+// ---- serveur ----
+async function post(path, body) {
+  const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+  return r.json();
+}
+async function save() {
+  const fixes = {}; for (const i in work) fixes[D.patterns[i].addr] = work[i];
+  const r = await post('/api/save', { fixes });
+  if (r.ok) { saved = state(); markDirty(); }
+  log(r.log, r.ok ? 'ok' : 'err');
+  return r.ok;
+}
+$('bSave').onclick = save;
+$('bBuild').onclick = async () => {
+  if (!await save()) return;
+  log('Compilation…');
+  const r = await post('/api/build');
+  log((r.ok ? 'Compilation réussie : ' + D.dsk + '\n\n' : 'Échec de la compilation :\n\n') + r.log, r.ok ? 'ok' : 'err');
+};
+$('bRun').onclick = async () => {
+  if (markDirty()) { log('Enregistre et compile d\'abord : le jeu lancé serait l\'ancienne version.', 'err'); return; }
+  const r = await post('/api/run'); log(r.log, r.ok ? 'ok' : 'err');
+};
+window.addEventListener('beforeunload', e => { if (markDirty()) { e.preventDefault(); e.returnValue = ''; } });
+
+(async () => {
+  D = await (await fetch('/api/data')).json();
+  D.patterns.forEach((p, i) => { if (p.fix) work[i] = p.fix; });
+  saved = state();
+  D.presets.forEach(([name], k) => $('preset').add(new Option(name, k)));
+  layers = JSON.parse(JSON.stringify(D.presets[0][1]));
+  buildList(); buildLayers(); select(0); drawPreview(); markDirty();
+  log('Prêt. Les motifs marqués ● sont redessinés pour le CPC.', 'ok');
+})();
+</script>
+</body>
+</html>
