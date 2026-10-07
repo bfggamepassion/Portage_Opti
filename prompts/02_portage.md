@@ -28,11 +28,15 @@ L'affichage, le son et les entrées sont réécrits avec les techniques propres 
 - **Graphismes** : conversion vers le format de la cible par des outils hors ligne (images modifiables → données de la cible), base d'un futur éditeur.
 - **Son, entrées** (clavier, joystick, redéfinition des touches), **chargements**.
 
-## Vérification à chaque étape
+## Vérification
 
-- L'outil de comparaison montre une mémoire du jeu identique à l'original, tour par tour, sur des parties scriptées dans plusieurs niveaux.
-- Coût mesuré de chaque partie du moteur, en % du budget d'un tour.
-- Démarrage, chargements et affichage vérifiés sur un vrai émulateur de la machine cible.
+Deux niveaux, pour ne pas payer le contrôle complet à chaque petite étape :
+
+- **Contrôle rapide, à chaque étape (moins de 2 minutes)** : assemblage sans erreur, et l'outil de comparaison sur une seule courte partie scriptée (quelques centaines de tours, un niveau) qui passe par le code modifié : mémoire du jeu identique à l'original, tour par tour.
+- **Contrôle complet, aux paliers seulement** (fin d'une partie du moteur, avant de me livrer une version) : parties scriptées dans plusieurs niveaux, coût mesuré de chaque partie du moteur en % du budget d'un tour, puis démarrage, chargements et affichage vérifiés sur un vrai émulateur de la machine cible.
+- Le coût du moteur ne se remesure que si l'étape touche l'affichage, le son ou la cadence.
+- Un test de plus de 2 minutes tourne en tâche de fond et affiche sa progression ; on continue à travailler pendant ce temps.
+- Si le contrôle rapide trouve un écart, s'arrêter et le corriger avant d'aller plus loin.
 
 ## Méthode
 

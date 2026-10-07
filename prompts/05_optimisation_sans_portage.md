@@ -98,7 +98,11 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 
 ## Étape 8 : vérifier chaque changement
 
-- Coût avant/après en % du budget (moyenne et pire cas), logique identique sur le scénario fixe et sur plusieurs parties au hasard, rendu identique (ou différence voulue vérifiée sur captures), son identique, couverture des essais indiquée, longue partie sans plantage (mort, fin de partie, retour au menu, changement de niveau, modes rares), puis commit.
+Deux niveaux, pour ne pas payer le contrôle complet à chaque changement :
+
+- **Contrôle rapide, à chaque changement (moins de 2 minutes)** : coût avant/après de la routine modifiée, mesuré sur une sauvegarde de scène chargée qui l'exécute ; logique, rendu et son identiques sur une seule courte partie (scénario fixe) qui passe par ce code ; puis commit. Si un écart apparaît, s'arrêter et le corriger avant d'aller plus loin.
+- **Contrôle complet, aux paliers seulement** (fin d'un chantier, avant de me livrer un support de test) : coût avant/après en % du budget (moyenne et pire cas), logique identique sur le scénario fixe et sur plusieurs parties au hasard, rendu identique (ou différence voulue vérifiée sur captures), son identique, couverture des essais indiquée, longue partie sans plantage (mort, fin de partie, retour au menu, changement de niveau, modes rares).
+- Un test de plus de 2 minutes tourne en tâche de fond et affiche sa progression ; on continue à travailler pendant ce temps.
 - Une mesure faite avec un autre scénario ou un autre comptage que la référence n'est pas comparable : refaire la référence dans les mêmes conditions.
 - À chaque palier, produire le support de test (disquette, ROM, cassette) et me le faire essayer sur émulateur ou machine réelle : le simulateur ne voit pas tout (chargement, menu, ressenti manette en main).
 

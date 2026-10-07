@@ -25,7 +25,10 @@ Contraintes matérielles : [ex. accès à la mémoire vidéo seulement pendant l
    - pile détournée : couper les interruptions ;
    - code qui se modifie : attention aux banques et à l'interruption ;
    - tables alignées : attention au passage de page.
-4. **Vérifier chaque changement** : coût avant/après en % du budget, logique identique, rendu identique, puis commit. Une optimisation sans gain mesurable est retirée.
+4. **Vérifier chaque changement**, en deux niveaux :
+   - **contrôle rapide, à chaque changement (moins de 2 minutes)** : coût avant/après de la routine modifiée, mesuré sur une scène chargée qui l'exécute ; logique et rendu identiques sur une seule courte partie scriptée qui passe par ce code ; puis commit. Une optimisation sans gain mesurable est retirée ;
+   - **contrôle complet, aux paliers seulement** (fin d'un chantier, avant de me livrer une version) : profil de tous les postes en % du budget, moyenne et pire cas, logique et rendu identiques sur des parties dans plusieurs niveaux, essai sur un vrai émulateur ;
+   - un test de plus de 2 minutes tourne en tâche de fond et affiche sa progression ; si le contrôle rapide trouve un écart, s'arrêter et le corriger avant d'aller plus loin.
 5. **La logique du jeu en dernier**, seulement s'il manque quelques %. D'abord supprimer le travail resté pour l'affichage de la machine d'origine, puis accélérer les routines les plus lourdes, sous contrôle de la comparaison avec l'original.
 
 ## Comptes rendus
