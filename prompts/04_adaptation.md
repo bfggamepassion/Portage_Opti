@@ -110,4 +110,17 @@ Tu t'arrêtes ici et tu me présentes l'analyse. Tu ne passes à l'étape 6 qu'a
 - **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le fichier de reprise, puis passer à une autre approche ou me poser la question si le choix me revient.
 - **Émulateur réel aux paliers seulement**, une fenêtre à la fois ; entre deux paliers, le simulateur suffit.
 
+## Économiser les tokens
+
+Tout ce qui entre dans la conversation (sorties d'outils, fichiers lus, images) est renvoyé à chaque échange jusqu'à la fin de la session.
+
+- **Sorties courtes** : chaque outil (simulateur, comparaison, profileur, `check.sh`) affiche par défaut un résumé de quelques lignes (ex. « rapide : OK, 12 tests, 48 s », ou le diagnostic d'un écart) et écrit le détail dans un fichier, lu seulement si besoin. Jamais de trace, de vidage mémoire ou de listing complet à l'écran.
+- **Lire peu** : le listing, les traces et les fichiers générés se consultent par recherche ciblée ou par plage de lignes, jamais en entier. Le listing est découpé en fichiers inclus par un fichier principal (un par banque ou par module, coupés aux frontières de routines) : il reste lisible et se réassemble toujours à l'identique (même MD5, test relancé après le découpage). Le code produit par un traducteur ne se relit ni ne se modifie : on corrige le traducteur ou le fichier de noms, puis on régénère.
+- **Scripts plutôt que commandes à la suite** : toute séquence répétée (construire, tester, mesurer, capturer) devient un script lancé en une fois.
+- **Images : comparer par calcul, regarder quand ça compte.** Les écrans se vérifient d'abord par comparaison chiffrée (octet par octet avec la référence, ou différence de pixels avec seuil), plus fiable qu'un coup d'œil. Une image est regardée quand le calcul ne peut pas trancher : premier affichage d'un nouvel écran ou d'un nouveau graphisme, différence voulue, couleurs et palette, écart signalé par la comparaison, et toujours au palier avant de me livrer une version. On regarde alors la zone utile rognée, à la taille réelle ou agrandie, plutôt que l'écran entier réduit (la réduction cache les défauts d'un pixel).
+- **Attendre sans surveiller** : un test lancé en tâche de fond prévient quand il finit ; ne pas consulter sa sortie à répétition en attendant.
+- **Modifications ciblées** : changer les lignes concernées plutôt que réécrire un fichier entier ; ne pas relire un fichier juste après l'avoir modifié.
+- **Comptes rendus aux paliers**, courts, plutôt qu'à intervalle fixe.
+- **Pas de sous-agents**, sauf pour un travail volumineux et vraiment indépendant (ils repartent de zéro et relisent ce qui est déjà connu).
+
 NE SOIT PAS VERBEUX !! EXPLIQUE MOI CE QUE TU AS FAIT A LA TOUTE FIN.
