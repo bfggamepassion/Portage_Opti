@@ -52,13 +52,13 @@ Chaque phase a son prompt dans `<DEPOT>\prompts\`. Si l'utilisateur colle un de 
 - Démarrage, chargement et affichage vérifiés sur un **vrai émulateur** de la cible avant d'annoncer qu'un
   support (disquette, ROM, cassette) marche : un simulateur maison ne voit ni le firmware, ni le DOS, ni le chargeur.
 - Construire hors des dossiers synchronisés (Google Drive, OneDrive) : ils ont corrompu des `.tap`/`.dsk`.
-- Si une optimisation s'enlise après un ou deux essais, **proposer des concessions** chiffrées à l'utilisateur plutôt que s'acharner.
+- Si une piste n'aboutit pas après deux essais, la noter, puis changer d'approche ou **proposer des concessions** chiffrées à l'utilisateur plutôt que s'acharner.
 
 ## Façon de travailler avec l'utilisateur
 
 - Parler français ; textes du jeu en anglais sauf décision contraire.
-- Peu verbeux pendant le travail ; un compte rendu clair à la fin (ou périodique sur les longues tâches :
-  tableau avant/après, ce qui est mesuré ou estimé, prochaine étape). Ne pas s'arrêter entre deux étapes d'un plan validé.
+- Pas de texte entre deux étapes ; un compte rendu court à chaque palier ou point d'arrêt, et à la fin
+  (tableau avant/après, ce qui est mesuré ou estimé, prochaine étape). Ne pas s'arrêter entre deux étapes d'un plan validé.
 - L'utilisateur teste visuellement et à l'oreille : déboguer dans les simulateurs, peu de lancements
   d'émulateur automatiques, une seule fenêtre d'émulateur à la fois, toujours laisser la version **normale**
   (pas la version de test) dans `build/`.

@@ -47,7 +47,7 @@ Les variables utiles au portage : niveau ou section, joueur (position, état), l
 
 Rien n'est noté comme sûr sans vérification, en simulation ou par lecture du code appelant. Les hypothèses sont marquées comme telles.
 
-Tiens à jour un fichier de reprise : outils et comment les lancer, état du travail, pièges rencontrés, prochaine action exacte.
+Tiens à jour le fichier de reprise (format dans « Aller vite »).
 
 ## 6. Vérification des livrables
 
@@ -57,7 +57,7 @@ Chaque livrable est vérifié par un test automatique qui passe, et ce test est 
 
 ## 7. Ne rien laisser en suspens
 
-Tout ce qui peut se faire avec les outils disponibles est fait avant de rendre la main : installer un outil manquant, simuler une deuxième machine (câble, deuxième joueur), atteindre chaque niveau en jouant plutôt qu'en le forçant (une fois, en gardant une sauvegarde d'état par niveau pour la suite), trancher une hypothèse qu'une trace ou une lecture du code permet de vérifier.
+Tout ce qui peut se faire avec les outils disponibles est fait avant de rendre la main : installer un outil manquant, simuler une deuxième machine (câble, deuxième joueur), une sauvegarde d'état par niveau (voir « Sauvegardes d'état »), trancher une hypothèse qu'une trace ou une lecture du code permet de vérifier.
 
 Ne restent en suspens que les décisions qui me reviennent (machine cible, choix de jeu) ou ce qui est réellement impossible. Pour chacune, le fichier de reprise donne la raison précise.
 
@@ -67,10 +67,9 @@ Définition de fini : chaque tâche est classée **obligatoire** (le portage en 
 
 - l'outil d'extraction et les images de référence ;
 - le simulateur et l'outil de comparaison ;
-- le listing et le fichier de noms ;
+- le listing, le fichier de noms et le script qui les réassemble en une ROM / un disque identique à l'original (§6) ;
 - le document « frontière du portage » avec la carte de la mémoire ;
-- le fichier de reprise ;
-- une rom / disque etc etc … recompilé à l'identique de ceux / celle que je t'ai fournit.
+- le fichier de reprise.
 
 ## Aller vite sans perdre en fiabilité
 
@@ -79,26 +78,20 @@ Définition de fini : chaque tâche est classée **obligatoire** (le portage en 
 - **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le fichier de reprise. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
 - **Rien à installer à la main** : tout outil supplémentaire (paquet, interpréteur, émulateur) est installé par un script du dépôt, sans compilateur ni manipulation de ma part. Si ce n'est pas possible, me proposer une autre solution.
 - **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
-- **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque niveau est atteint une fois en jouant, puis sa sauvegarde sert à tous les tests suivants.
+- **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque sauvegarde est faite une fois et sert à tous les tests suivants. Un niveau peut être forcé (saut direct) au lieu d'être atteint en jouant, à condition d'avoir vérifié sur un niveau que l'état forcé est identique à l'état atteint en jouant ; si ce n'est pas le cas pour un niveau, celui-là est atteint en jouant.
 - **Construire et tester dans un dossier local**, hors du dossier synchronisé (Google Drive, OneDrive) : plus rapide et sans fichiers corrompus.
-- **Tests longs en tâche de fond**, avec leur progression ; travailler pendant ce temps, jamais d'attente active. Les tests indépendants se lancent en parallèle.
+- **Tests longs en tâche de fond**, avec leur progression. Les tests indépendants se lancent en parallèle.
 - **Une seule commande de contrôle** : `sh check.sh rapide` et `sh check.sh complet`. Elle enchaîne construction et tests, s'arrête à la première erreur et rend un code d'échec ; c'est elle qu'on lance, toujours la même, notée dans le fichier de reprise. Ne jamais juger un résultat à travers `tail` ou une sortie tronquée.
 - **Ne pas relire ce qui est connu** : le fichier de reprise, le fichier de noms et la carte de la mémoire font foi. Chercher une adresse ou une routine par une recherche ciblée, pas en relisant tout le listing.
-- **Fichier de reprise court** (une page environ), toujours dans le même ordre : 1. état ; 2. commandes (construction, `check.sh`, lancement) ; 3. prochaine action exacte ; 4. pièges. Le détail (mesures, essais abandonnés, historique) va dans des documents à part qu'il cite.
-- **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le fichier de reprise, puis passer à une autre approche ou me poser la question si le choix me revient.
+- **Fichier de reprise court** (une page environ), toujours dans le même ordre : 1. état ; 2. commandes (construction, `check.sh`, lancement) ; 3. prochaine action exacte ; 4. pièges. Le détail (mesures, essais abandonnés et pourquoi, historique) va dans un journal à part qu'il cite.
+- **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le journal, puis passer à une autre approche, ou me proposer des concessions chiffrées si le choix me revient.
 - **Émulateur réel aux paliers seulement**, une fenêtre à la fois ; entre deux paliers, le simulateur suffit.
 
 ## Économiser les tokens
 
-Tout ce qui entre dans la conversation (sorties d'outils, fichiers lus, images) est renvoyé à chaque échange jusqu'à la fin de la session.
-
 - **Sorties courtes** : chaque outil (simulateur, comparaison, profileur, `check.sh`) affiche par défaut un résumé de quelques lignes (ex. « rapide : OK, 12 tests, 48 s », ou le diagnostic d'un écart) et écrit le détail dans un fichier, lu seulement si besoin. Jamais de trace, de vidage mémoire ou de listing complet à l'écran.
-- **Lire peu** : le listing, les traces et les fichiers générés se consultent par recherche ciblée ou par plage de lignes, jamais en entier. Le listing est découpé en fichiers inclus par un fichier principal (un par banque ou par module, coupés aux frontières de routines) : il reste lisible et se réassemble toujours à l'identique (même MD5, test relancé après le découpage). Le code produit par un traducteur ne se relit ni ne se modifie : on corrige le traducteur ou le fichier de noms, puis on régénère.
+- **Lire peu** : le listing, les traces et les fichiers générés se consultent par recherche ciblée ou par plage de lignes, jamais en entier. Le listing est découpé en fichiers inclus par un fichier principal (un par banque ou par module, coupés aux frontières de routines) : il reste lisible et se réassemble toujours à l'identique (même MD5, test relancé après le découpage).
 - **Scripts plutôt que commandes à la suite** : toute séquence répétée (construire, tester, mesurer, capturer) devient un script lancé en une fois.
 - **Images : comparer par calcul, regarder quand ça compte.** Les écrans se vérifient d'abord par comparaison chiffrée (octet par octet avec la référence, ou différence de pixels avec seuil), plus fiable qu'un coup d'œil. Une image est regardée quand le calcul ne peut pas trancher : premier affichage d'un nouvel écran ou d'un nouveau graphisme, différence voulue, couleurs et palette, écart signalé par la comparaison, et toujours au palier avant de me livrer une version. On regarde alors la zone utile rognée, à la taille réelle ou agrandie, plutôt que l'écran entier réduit (la réduction cache les défauts d'un pixel).
-- **Attendre sans surveiller** : un test lancé en tâche de fond prévient quand il finit ; ne pas consulter sa sortie à répétition en attendant.
-- **Modifications ciblées** : changer les lignes concernées plutôt que réécrire un fichier entier ; ne pas relire un fichier juste après l'avoir modifié.
-- **Comptes rendus aux paliers**, courts, plutôt qu'à intervalle fixe.
-- **Pas de sous-agents**, sauf pour un travail volumineux et vraiment indépendant (ils repartent de zéro et relisent ce qui est déjà connu).
 
-NE SOIT PAS VERBEUX !! EXPLIQUE MOI CE QUE TU AS FAIT A LA TOUTE FIN.
+Pas de texte entre deux étapes. Un compte rendu court et simple à chaque palier ou point d'arrêt, et un dernier à la fin : ce qui a été fait, ce qui est mesuré ou seulement estimé, ce qui reste.

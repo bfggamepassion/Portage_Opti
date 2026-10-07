@@ -18,11 +18,11 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 - **La logique ne change pas.** La mémoire du jeu est comparée à l'original tour par tour, sur des parties aux touches scriptées et au hasard rendu identique. Toute différence bloque, sauf pour les variables qui dépendent du temps (compteurs d'interruptions, état du lecteur de sons, variables d'affichage) : elles sont exclues une par une, dans une liste écrite, avec la raison de chaque exclusion.
 - **Le rendu ne change pas, sauf amélioration voulue.** Les écrans sont comparés octet par octet avec une version de référence à cadence fixe. Une amélioration voulue (images intermédiaires, par exemple) se désactive par une option pour pouvoir refaire cette comparaison.
 - **Le son ne change pas.** Les écritures dans la puce sonore sont comparées à la référence. Si une optimisation saute des écritures, prouver au simulateur que chacune aurait réécrit la valeur déjà présente.
-- **Rien sans mesure.** Une estimation est marquée « estimation », puis remplacée par la mesure. Une optimisation sans gain mesurable est retirée.
+- **Rien sans mesure.** Une estimation est marquée « estimation », puis remplacée par la mesure. Une optimisation sans gain mesurable est retirée. Une mesure faite avec un autre scénario ou un autre comptage que la référence n'est pas comparable : refaire la référence dans les mêmes conditions.
 - Chaque changement indique son coût en mémoire : nombre d'octets et emplacement. La carte des zones libres est tenue à jour.
 - Décisions d'architecture validées par moi avant d'être codées. Si une décision validée doit changer, demander de nouveau avant de changer de voie.
 - Commit et push réguliers sur [branche]. Un commit = un changement vérifié (logique identique, rendu identique ou différence voulue).
-- Fichier de reprise tenu à jour en continu : outils et commandes, état, mesures, pièges, essais abandonnés et pourquoi, prochaine action exacte. Il doit suffire pour reprendre après une coupure de session.
+- Fichier de reprise tenu à jour en continu (format dans « Aller vite ») : il doit suffire pour reprendre après une coupure de session. Mesures et essais abandonnés vont dans le journal qu'il cite.
 
 ## Étape 1 : extraire
 
@@ -103,7 +103,6 @@ Deux niveaux, pour ne pas payer le contrôle complet à chaque changement :
 - **Contrôle rapide, à chaque changement (moins de 2 minutes)** : coût avant/après de la routine modifiée, mesuré sur une sauvegarde de scène chargée qui l'exécute ; logique, rendu et son identiques sur une seule courte partie (scénario fixe) qui passe par ce code ; puis commit. Si un écart apparaît, s'arrêter et le corriger avant d'aller plus loin.
 - **Contrôle complet, aux paliers seulement** (fin d'un chantier, avant de me livrer un support de test) : coût avant/après en % du budget (moyenne et pire cas), logique identique sur le scénario fixe et sur plusieurs parties au hasard, rendu identique (ou différence voulue vérifiée sur captures), son identique, couverture des essais indiquée, longue partie sans plantage (mort, fin de partie, retour au menu, changement de niveau, modes rares).
 - Un test de plus de 2 minutes tourne en tâche de fond et affiche sa progression ; on continue à travailler pendant ce temps.
-- Une mesure faite avec un autre scénario ou un autre comptage que la référence n'est pas comparable : refaire la référence dans les mêmes conditions.
 - À chaque palier, produire le support de test (disquette, ROM, cassette) et me le faire essayer sur émulateur ou machine réelle : le simulateur ne voit pas tout (chargement, menu, ressenti manette en main).
 
 ## Étape 9 : employer le temps gagné (si demandé)
@@ -118,15 +117,14 @@ Deux niveaux, pour ne pas payer le contrôle complet à chaque changement :
 
 ## Comptes rendus
 
-À chaque palier (fin d'une étape ou d'un chantier), en langage simple et court :
+À chaque palier ou point d'arrêt (fin d'une étape ou d'un chantier), et à la fin, en langage simple et court :
 - tableau par poste en % du budget, avant/après, en signalant ce qui dépasse ;
 - résultat visible (images/s, régularité, vitesse du jeu) ;
 - ce qui est mesuré et ce qui n'est qu'estimé ;
 - couverture des essais et ce qui n'a pas été testé ;
-- temps de travail prévu et réel ;
 - questions éventuelles.
 
-Pas de bavardage entre deux comptes rendus.
+Pas de texte entre deux comptes rendus.
 
 ## Livrables
 
@@ -144,26 +142,18 @@ Pas de bavardage entre deux comptes rendus.
 - **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le fichier de reprise. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
 - **Rien à installer à la main** : tout outil supplémentaire (paquet, interpréteur, émulateur) est installé par un script du dépôt, sans compilateur ni manipulation de ma part. Si ce n'est pas possible, me proposer une autre solution.
 - **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
-- **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque niveau est atteint une fois en jouant, puis sa sauvegarde sert à tous les tests suivants.
+- **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque sauvegarde est faite une fois et sert à tous les tests suivants. Un niveau peut être forcé (saut direct) au lieu d'être atteint en jouant, à condition d'avoir vérifié sur un niveau que l'état forcé est identique à l'état atteint en jouant ; si ce n'est pas le cas pour un niveau, celui-là est atteint en jouant.
 - **Construire et tester dans un dossier local**, hors du dossier synchronisé (Google Drive, OneDrive) : plus rapide et sans fichiers corrompus.
-- **Tests longs en tâche de fond**, avec leur progression ; travailler pendant ce temps, jamais d'attente active. Les tests indépendants se lancent en parallèle.
+- **Tests longs en tâche de fond**, avec leur progression. Les tests indépendants se lancent en parallèle.
 - **Une seule commande de contrôle** : `sh check.sh rapide` et `sh check.sh complet`. Elle enchaîne construction et tests, s'arrête à la première erreur et rend un code d'échec ; c'est elle qu'on lance, toujours la même, notée dans le fichier de reprise. Ne jamais juger un résultat à travers `tail` ou une sortie tronquée.
 - **Ne pas relire ce qui est connu** : le fichier de reprise, le fichier de noms et la carte de la mémoire font foi. Chercher une adresse ou une routine par une recherche ciblée, pas en relisant tout le listing.
-- **Fichier de reprise court** (une page environ), toujours dans le même ordre : 1. état ; 2. commandes (construction, `check.sh`, lancement) ; 3. prochaine action exacte ; 4. pièges. Le détail (mesures, essais abandonnés, historique) va dans des documents à part qu'il cite.
-- **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le fichier de reprise, puis passer à une autre approche ou me poser la question si le choix me revient.
+- **Fichier de reprise court** (une page environ), toujours dans le même ordre : 1. état ; 2. commandes (construction, `check.sh`, lancement) ; 3. prochaine action exacte ; 4. pièges. Le détail (mesures, essais abandonnés et pourquoi, historique) va dans un journal à part qu'il cite.
+- **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le journal, puis passer à une autre approche, ou me proposer des concessions chiffrées si le choix me revient.
 - **Émulateur réel aux paliers seulement**, une fenêtre à la fois ; entre deux paliers, le simulateur suffit.
 
 ## Économiser les tokens
 
-Tout ce qui entre dans la conversation (sorties d'outils, fichiers lus, images) est renvoyé à chaque échange jusqu'à la fin de la session.
-
 - **Sorties courtes** : chaque outil (simulateur, comparaison, profileur, `check.sh`) affiche par défaut un résumé de quelques lignes (ex. « rapide : OK, 12 tests, 48 s », ou le diagnostic d'un écart) et écrit le détail dans un fichier, lu seulement si besoin. Jamais de trace, de vidage mémoire ou de listing complet à l'écran.
-- **Lire peu** : le listing, les traces et les fichiers générés se consultent par recherche ciblée ou par plage de lignes, jamais en entier. Le listing est découpé en fichiers inclus par un fichier principal (un par banque ou par module, coupés aux frontières de routines) : il reste lisible et se réassemble toujours à l'identique (même MD5, test relancé après le découpage). Le code produit par un traducteur ne se relit ni ne se modifie : on corrige le traducteur ou le fichier de noms, puis on régénère.
+- **Lire peu** : le listing, les traces et les fichiers générés se consultent par recherche ciblée ou par plage de lignes, jamais en entier. Le listing est découpé en fichiers inclus par un fichier principal (un par banque ou par module, coupés aux frontières de routines) : il reste lisible et se réassemble toujours à l'identique (même MD5, test relancé après le découpage).
 - **Scripts plutôt que commandes à la suite** : toute séquence répétée (construire, tester, mesurer, capturer) devient un script lancé en une fois.
 - **Images : comparer par calcul, regarder quand ça compte.** Les écrans se vérifient d'abord par comparaison chiffrée (octet par octet avec la référence, ou différence de pixels avec seuil), plus fiable qu'un coup d'œil. Une image est regardée quand le calcul ne peut pas trancher : premier affichage d'un nouvel écran ou d'un nouveau graphisme, différence voulue, couleurs et palette, écart signalé par la comparaison, et toujours au palier avant de me livrer une version. On regarde alors la zone utile rognée, à la taille réelle ou agrandie, plutôt que l'écran entier réduit (la réduction cache les défauts d'un pixel).
-- **Attendre sans surveiller** : un test lancé en tâche de fond prévient quand il finit ; ne pas consulter sa sortie à répétition en attendant.
-- **Modifications ciblées** : changer les lignes concernées plutôt que réécrire un fichier entier ; ne pas relire un fichier juste après l'avoir modifié.
-- **Comptes rendus aux paliers**, courts, plutôt qu'à intervalle fixe.
-- **Pas de sous-agents**, sauf pour un travail volumineux et vraiment indépendant (ils repartent de zéro et relisent ce qui est déjà connu).
-
-NE SOIT PAS VERBEUX !! EXPLIQUE MOI CE QUE TU AS FAIT A LA TOUTE FIN.
