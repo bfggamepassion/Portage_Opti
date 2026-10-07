@@ -15,7 +15,7 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 
 ## Règles permanentes
 
-- **La logique ne change pas.** La mémoire du jeu est comparée à l'original tour par tour, sur des parties aux touches scriptées et au hasard rendu identique. Toute différence bloque, sauf pour les variables qui dépendent du temps (compteurs d'interruptions, état du lecteur de sons, variables d'affichage) : elles sont exclues une par une, dans une liste écrite, avec la raison de chaque exclusion.
+- **La logique ne change pas.** La mémoire du jeu est comparée à l'original tour par tour, sur des parties aux touches scriptées et au hasard rendu identique. Toute différence bloque, sauf pour les variables qui dépendent du temps (compteurs d'interruptions, état du lecteur de sons, variables d'affichage) : elles sont exclues une par une, dans la configuration de l'outil de comparaison, avec la raison de chaque exclusion en commentaire.
 - **Le rendu ne change pas, sauf amélioration voulue.** Les écrans sont comparés octet par octet avec une version de référence à cadence fixe. Une amélioration voulue (images intermédiaires, par exemple) se désactive par une option pour pouvoir refaire cette comparaison.
 - **Le son ne change pas.** Les écritures dans la puce sonore sont comparées à la référence. Si une optimisation saute des écritures, prouver au simulateur que chacune aurait réécrit la valeur déjà présente.
 - **Rien sans mesure.** Une estimation est marquée « estimation », puis remplacée par la mesure. Une optimisation sans gain mesurable est retirée. Une mesure faite avec un autre scénario ou un autre comptage que la référence n'est pas comparable : refaire la référence dans les mêmes conditions.
@@ -28,7 +28,7 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 
 - Identifier le format et son contenu : chargeur, protection, compression, blocs chargés en cours de partie, banques, programmes multiples (ex. une partie 1 et une partie 2), processeurs multiples.
 - Écrire l'outil qui produit, depuis le fichier d'origine, une image de référence par programme, bloc, banque et processeur : la mémoire au démarrage du jeu, avec les registres et une somme de contrôle (MD5).
-- Décrire le conteneur brièvement, sans le reconstruire. Exception : les parties qu'il faudra modifier pour charger le nouveau code (menu, chargeur), à repérer dès maintenant, avec leurs limites de place.
+- Ne pas reconstruire ni décrire le conteneur : l'outil d'extraction en tient lieu. Exception : les parties qu'il faudra modifier pour charger le nouveau code (menu, chargeur), repérées dès maintenant et notées dans la carte de la mémoire avec leurs limites de place.
 
 ## Étape 2 : simulateur et outils de contrôle
 
@@ -64,7 +64,7 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 - Repérer ce que la logique lit sur l'écran ou dans les images (collisions, hauteurs d'image modifiées en cours de tour…).
 - Repérer les variables d'affichage que la logique lit (numéro de l'écran caché, compteur d'images, compteur d'interruptions) : elles servent souvent de « un tour sur deux » ou de hasard, et changent de sens dès que l'affichage est découplé.
 - Recenser tout ce que le jeu écrit directement à l'écran dans la zone de jeu (textes, compteurs, effets), sur un écran ou sur les deux : si les dessins sont plus tard notés puis rendus, ces écritures passent dans le mauvais ordre.
-- Carte de la mémoire : variables utiles, zones jamais lues ni écrites par le jeu (vérifiées sur de longues parties qui atteignent bien le jeu, démarrage compris : tables construites à l'initialisation), zones remises à zéro par le chargeur, zones non chargées qui gardent des restes du fichier, profondeur maximale de la pile.
+- Carte de la mémoire (les variables utiles vont dans le fichier de noms) : zones jamais lues ni écrites par le jeu (vérifiées sur de longues parties qui atteignent bien le jeu, démarrage compris : tables construites à l'initialisation), zones remises à zéro par le chargeur, zones non chargées qui gardent des restes du fichier, profondeur maximale de la pile.
 - Comparer les programmes entre eux. Si deux programmes partagent le même moteur, le noter avec ses différences (paramètres, tables, fenêtre de jeu, modes rares). Pour chaque mode rare, dire comment l'atteindre ou le forcer en simulation.
 
 ## Étape 5 : mesurer, puis s'arrêter
@@ -72,8 +72,7 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 - Cadence réelle de l'original : tours par seconde et trames par tour, par niveau, moyenne et pire cas.
 - Coût de chaque grande partie en % du budget : logique, décor, défilement, dessin des sprites, préparation des sprites, son, clavier, attente. Moyenne et pire cas, pour chaque programme.
 - Plafond utile : de combien le jeu déplace la caméra et les objets par tour (en points, en octets, en lignes), dans quelles directions, et quels pas le matériel sait décaler sans redessiner. En déduire le nombre d'images différentes qu'on peut montrer par seconde. Au-delà, on montrerait deux fois la même image.
-- Livrable : un tableau de départ et le plafond calculé.
-- **Point d'arrêt** : me présenter ces résultats et attendre ma décision de continuer, avec quel objectif.
+- **Point d'arrêt** : me présenter le tableau de départ et le plafond calculé, et attendre ma décision de continuer, avec quel objectif.
 
 ## Étape 6 : architecture (me faire valider)
 
@@ -130,16 +129,15 @@ Pas de texte entre deux comptes rendus.
 
 - outils d'extraction, de simulation (avec son test de durées), de comparaison (logique, écrans, son), de couverture, de profilage et de comptage d'images ;
 - source réassemblable et fichier de noms ;
-- document « frontière et mémoire » pour chaque programme, avec la liste des variables exclues de la comparaison et leur raison ;
+- document « frontière et mémoire » pour chaque programme ;
 - disquette, ROM ou cassette de test à jour ;
-- rapport d'analyse (tableaux avant/après, plafond calculé) ;
 - fichier de reprise.
 
 ## Aller vite sans perdre en fiabilité
 
 - **Réutiliser avant d'écrire** : les kits et outils de `Portage_Opti` (skill `portage-retro`) et ceux déjà dans le dépôt. N'écrire un outil que s'il n'existe pas.
 - **Outils génériques séparés du jeu** : un outil qui ne dépend pas du jeu (processeur, puce vidéo ou son, format de disquette ou de cassette, banc de comparaison) est écrit sans rien de propre au jeu, dans son propre fichier, avec son test. À la fin, me proposer la liste de ceux qui méritent d'entrer dans `Portage_Opti` ; je valide l'ajout.
-- **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le fichier de reprise. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
+- **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le journal. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
 - **Rien à installer à la main** : tout outil supplémentaire (paquet, interpréteur, émulateur) est installé par un script du dépôt, sans compilateur ni manipulation de ma part. Si ce n'est pas possible, me proposer une autre solution.
 - **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
 - **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque sauvegarde est faite une fois et sert à tous les tests suivants. Un niveau peut être forcé (saut direct) au lieu d'être atteint en jouant, à condition d'avoir vérifié sur un niveau que l'état forcé est identique à l'état atteint en jouant ; si ce n'est pas le cas pour un niveau, celui-là est atteint en jouant.

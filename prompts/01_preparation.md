@@ -10,7 +10,7 @@ Identifie le format et ce qu'il contient : chargeur, protection, compression, bl
 
 Écris un outil qui produit, depuis le fichier d'origine, l'image de référence : la mémoire au moment où le jeu démarre, avec les registres. Il en faut une par bloc chargé plus tard, par banque et par processeur. Note leurs sommes de contrôle (MD5).
 
-Le conteneur lui-même (chargeur, protection, compression) est décrit brièvement mais pas reconstruit.
+Le conteneur lui-même (chargeur, protection, compression) n'est ni reconstruit ni décrit : l'outil d'extraction en tient lieu.
 
 ## 2. Faire tourner l'original
 
@@ -41,7 +41,7 @@ Pour chacune, indique ses effets en dehors de l'affichage (variables, tampons, p
 
 ## 5. Carte de la mémoire, minimale
 
-Les variables utiles au portage : niveau ou section, joueur (position, état), liste des objets ou ennemis (format d'une entrée), score, vies, touches, et toute variable lue par les routines de l'étape 4.
+Les variables utiles au portage (niveau ou section, joueur, objets ou ennemis, score, vies, touches, et toute variable lue par les routines de l'étape 4) vont dans le fichier de noms. La carte ne garde que ce qu'il ne peut pas dire : format des tables et d'une entrée d'objet, zones libres, profondeur de la pile.
 
 ### Règles
 
@@ -53,7 +53,7 @@ Tiens à jour le fichier de reprise (format dans « Aller vite »).
 
 Le listing doit se réassembler en une ROM identique octet pour octet à l'original (même MD5). Fournis le script de reconstruction (assembleur installé si besoin, constantes pour tous les noms de RAM et de registres) et lance-le : un listing qui ne redonne pas la ROM d'origine n'est pas livré. Relance ce test après chaque modification du fichier de noms ou du désassembleur.
 
-Chaque livrable est vérifié par un test automatique qui passe, et ce test est noté dans le fichier de reprise avec son résultat.
+Chaque livrable est vérifié par un test automatique qui passe, lancé par `check.sh` : le fichier de reprise cite la commande, pas les résultats.
 
 ## 7. Ne rien laisser en suspens
 
@@ -61,7 +61,7 @@ Tout ce qui peut se faire avec les outils disponibles est fait avant de rendre l
 
 Ne restent en suspens que les décisions qui me reviennent (machine cible, choix de jeu) ou ce qui est réellement impossible. Pour chacune, le fichier de reprise donne la raison précise.
 
-Définition de fini : chaque tâche est classée **obligatoire** (le portage en a besoin : extraction, simulateur, comparaison, listing réassemblé, frontière, carte mémoire, reprise) ou **souhaitable** (le reste : deuxième machine, câble, modes rares, finitions de noms…). Les obligatoires sont toutes faites ; les souhaitables seulement si elles coûtent peu, sinon elles sont listées dans le fichier de reprise avec leur intérêt et leur coût estimé.
+Définition de fini : chaque tâche est classée **obligatoire** (le portage en a besoin : extraction, simulateur, comparaison, listing réassemblé, frontière, carte mémoire, reprise) ou **souhaitable** (le reste : deuxième machine, câble, modes rares, finitions de noms…). Les obligatoires sont toutes faites ; les souhaitables seulement si elles coûtent peu, sinon elles sont listées dans le compte rendu final avec leur intérêt et leur coût estimé.
 
 ## Livrables
 
@@ -75,7 +75,7 @@ Définition de fini : chaque tâche est classée **obligatoire** (le portage en 
 
 - **Réutiliser avant d'écrire** : les kits et outils de `Portage_Opti` (skill `portage-retro`) et ceux déjà dans le dépôt. N'écrire un outil que s'il n'existe pas.
 - **Outils génériques séparés du jeu** : un outil qui ne dépend pas du jeu (processeur, puce vidéo ou son, format de disquette ou de cassette, banc de comparaison) est écrit sans rien de propre au jeu, dans son propre fichier, avec son test. À la fin, me proposer la liste de ceux qui méritent d'entrer dans `Portage_Opti` ; je valide l'ajout.
-- **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le fichier de reprise. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
+- **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le journal. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
 - **Rien à installer à la main** : tout outil supplémentaire (paquet, interpréteur, émulateur) est installé par un script du dépôt, sans compilateur ni manipulation de ma part. Si ce n'est pas possible, me proposer une autre solution.
 - **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
 - **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque sauvegarde est faite une fois et sert à tous les tests suivants. Un niveau peut être forcé (saut direct) au lieu d'être atteint en jouant, à condition d'avoir vérifié sur un niveau que l'état forcé est identique à l'état atteint en jouant ; si ce n'est pas le cas pour un niveau, celui-là est atteint en jouant.

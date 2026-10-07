@@ -67,15 +67,15 @@ Tu t'arrêtes ici et tu me présentes l'analyse. Tu ne passes à l'étape 6 qu'a
 - Outils hors ligne reproductibles : conversion des graphismes, empaquetage des niveaux, conversion des musiques. Un script unique régénère tout depuis les sources.
 - Petites étapes, chacune vérifiée puis committée. Le fichier de noms, la carte de la mémoire et le journal des décisions sont mis à jour dans le même commit.
 - Pour tout ce qui est gardé, la logique reste identique à l'original : l'outil de comparaison montre une mémoire du jeu identique, tour par tour, sur des parties scriptées.
-- Là où la logique doit changer (niveau retiré, ennemi retiré, règle simplifiée), l'écart est consigné dans une liste d'écarts, et la comparaison est adaptée pour ne signaler que les écarts non listés.
+- Là où la logique doit changer (niveau retiré, ennemi retiré, règle simplifiée), l'écart est inscrit dans la configuration de l'outil de comparaison (adresses ou tours concernés, décision qui le justifie en commentaire), qui ne signale alors que les écarts non inscrits.
 - Si le temps de calcul dépasse le budget : répartir le travail sur plusieurs tours, mettre à jour moins souvent les objets éloignés, simplifier les collisions, sans changer la sensation de jeu. Signaler les astuces risquées et leurs précautions.
 
 ## 7. Vérification
 
 - Taille finale par catégorie, pic de temps par tour, maximum de sprites par ligne rencontré, mémoire vidéo utilisée : tout est mesuré, dans la scène la plus chargée.
 - Démarrage, chargements, affichage et son vérifiés sur un vrai émulateur de la cible.
-- Bilan de fidélité : identique, dégradé, absent, avec l'impact estimé sur le joueur.
-- Chaque livrable est vérifié par un test automatique qui passe, noté dans le fichier de reprise avec son résultat.
+- Chaque livrable est vérifié par un test automatique qui passe, lancé par `check.sh` : le fichier de reprise cite la commande, pas les résultats.
+- Le compte rendu final donne le bilan de fidélité : identique, dégradé, absent, avec l'impact estimé sur le joueur.
 
 ## Règles
 
@@ -85,11 +85,8 @@ Tu t'arrêtes ici et tu me présentes l'analyse. Tu ne passes à l'étape 6 qu'a
 
 ## Livrables
 
-- le budget de la cible et l'inventaire « origine contre budget » ;
-- la liste de ce qui fait le jeu ;
-- le journal des décisions (élément, décision, coût, gain, impact, réversibilité) et la liste d'écarts ;
+- le journal des décisions (élément, décision, coût, gain, impact, réversibilité), qui reprend la liste de ce qui fait le jeu validée à l'étape 5 ;
 - les outils de conversion et le code adapté, avec le script de reconstruction ;
-- le bilan de fidélité ;
 - le fichier de reprise ;
 - une ROM / un disque etc. fonctionnel pour la cible.
 
