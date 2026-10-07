@@ -11,7 +11,7 @@ fichier (ROM, disquette, cassette…).
 2. Installer les skills : `powershell -ExecutionPolicy Bypass -File installer.ps1`.
 3. Créer un dépôt vide pour le jeu (hors Google Drive pour les builds), y mettre le fichier d'origine.
 4. Ouvrir Claude Code dans ce dépôt et coller le prompt de la phase, champs `[ ]` remplis :
-   [préparation](prompts/01_preparation.md) → [portage](prompts/02_portage.md) →
+   [préparation](prompts/01_preparation.md) → [portage](prompts/02a_portage.md) ou [remake](prompts/02b_remake.md) →
    [optimisation](prompts/03_optimisation.md) ; [adaptation](prompts/04_adaptation.md) si le jeu ne tient pas ;
    [optimisation sans portage](prompts/05_optimisation_sans_portage.md) pour accélérer un jeu sur sa machine.
 5. À chaque nouvelle session : « Lis le fichier de reprise et continue. »

@@ -24,7 +24,7 @@ Chaque phase a son prompt dans `<DEPOT>\prompts\`. Si l'utilisateur colle un de 
 1. **Préparation** (`01_preparation.md`) : extraire l'image de référence (MD5), simulateur pilotable par
    script, outil de comparaison tour par tour, listing **réassemblable à l'identique**, fichier de noms,
    document « frontière du portage » + carte mémoire minimale, fichier de reprise.
-2. **Portage** (`02_portage.md`) : logique identique, affichage/son/entrées natifs.
+2. **Portage** (`02a_portage.md`) : logique identique, affichage/son/entrées natifs. Ou **remake** (`02b_remake.md`) : réécriture native quand le code d'origine ne peut pas servir de moteur, comportement prouvé identique par comparaison de traces avec l'original.
 3. **Optimisation** (`03_optimisation.md`) ou **optimisation sans portage** (`05_optimisation_sans_portage.md`).
 4. **Adaptation** (`04_adaptation.md`) quand le jeu ne tient pas : budget, inventaire, triage, **arrêt
    obligatoire** avant toute coupe.

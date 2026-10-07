@@ -9,7 +9,8 @@ l'optimisation a besoin. L'adaptation s'intercale quand le jeu ne tient pas sur 
 | Fichier | Quand |
 |---|---|
 | [01_preparation.md](01_preparation.md) | Avant tout : extraire, simuler, désassembler, délimiter la frontière du portage |
-| [02_portage.md](02_portage.md) | Écrire le portage (logique identique, affichage/son/entrées natifs) |
+| [02a_portage.md](02a_portage.md) | Écrire le portage (logique identique, affichage/son/entrées natifs) |
+| [02b_remake.md](02b_remake.md) | Ou réécrire le jeu en natif quand le code d'origine ne peut pas servir de moteur, comportement prouvé identique par l'oracle |
 | [03_optimisation.md](03_optimisation.md) | Le portage marche mais ne tient pas la cadence |
 | [04_adaptation.md](04_adaptation.md) | Le jeu est trop gros pour la cible : trancher, avec l'accord de l'utilisateur |
 | [05_optimisation_sans_portage.md](05_optimisation_sans_portage.md) | Accélérer un jeu sur sa propre machine |
