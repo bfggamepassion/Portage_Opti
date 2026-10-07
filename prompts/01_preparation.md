@@ -19,7 +19,7 @@ Un simulateur ou un émulateur pilotable par script qui lance l'image de référ
 - relever la mémoire à chaque tour de jeu ;
 - noter les adresses exécutées.
 
-Prépare dès maintenant l'outil de comparaison qui servira pendant tout le portage : même partie scriptée sur l'original et sur le portage, mémoire du jeu comparée tour par tour. Il enregistre une fois pour toutes les traces de l'original par scénario (voir « Aller vite »), et le simulateur sait sauvegarder et recharger un état.
+Prépare dès maintenant l'outil de comparaison qui servira pendant tout le portage : même partie scriptée sur l'original et sur le portage, mémoire du jeu comparée tour par tour. Il enregistre une fois pour toutes les traces de l'original par scénario (voir « Aller vite »), et le simulateur sait sauvegarder et recharger un état. En cas d'écart, il donne seul le diagnostic : premier tour différent, adresses en cause, instruction qui les a écrites de chaque côté, dernières routines appelées.
 
 ## 3. Listing et noms
 
@@ -61,6 +61,8 @@ Tout ce qui peut se faire avec les outils disponibles est fait avant de rendre l
 
 Ne restent en suspens que les décisions qui me reviennent (machine cible, choix de jeu) ou ce qui est réellement impossible. Pour chacune, le fichier de reprise donne la raison précise.
 
+Définition de fini : chaque tâche est classée **obligatoire** (le portage en a besoin : extraction, simulateur, comparaison, listing réassemblé, frontière, carte mémoire, reprise) ou **souhaitable** (le reste : deuxième machine, câble, modes rares, finitions de noms…). Les obligatoires sont toutes faites ; les souhaitables seulement si elles coûtent peu, sinon elles sont listées dans le fichier de reprise avec leur intérêt et leur coût estimé.
+
 ## Livrables
 
 - l'outil d'extraction et les images de référence ;
@@ -73,11 +75,16 @@ Ne restent en suspens que les décisions qui me reviennent (machine cible, choix
 ## Aller vite sans perdre en fiabilité
 
 - **Réutiliser avant d'écrire** : les kits et outils de `Portage_Opti` (skill `portage-retro`) et ceux déjà dans le dépôt. N'écrire un outil que s'il n'existe pas.
+- **Outils génériques séparés du jeu** : un outil qui ne dépend pas du jeu (processeur, puce vidéo ou son, format de disquette ou de cassette, banc de comparaison) est écrit sans rien de propre au jeu, dans son propre fichier, avec son test. À la fin, me proposer la liste de ceux qui méritent d'entrer dans `Portage_Opti` ; je valide l'ajout.
+- **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le fichier de reprise. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
+- **Rien à installer à la main** : tout outil supplémentaire (paquet, interpréteur, émulateur) est installé par un script du dépôt, sans compilateur ni manipulation de ma part. Si ce n'est pas possible, me proposer une autre solution.
 - **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
 - **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque niveau est atteint une fois en jouant, puis sa sauvegarde sert à tous les tests suivants.
 - **Construire et tester dans un dossier local**, hors du dossier synchronisé (Google Drive, OneDrive) : plus rapide et sans fichiers corrompus.
 - **Tests longs en tâche de fond**, avec leur progression ; travailler pendant ce temps, jamais d'attente active. Les tests indépendants se lancent en parallèle.
+- **Une seule commande de contrôle** : `sh check.sh rapide` et `sh check.sh complet`. Elle enchaîne construction et tests, s'arrête à la première erreur et rend un code d'échec ; c'est elle qu'on lance, toujours la même, notée dans le fichier de reprise. Ne jamais juger un résultat à travers `tail` ou une sortie tronquée.
 - **Ne pas relire ce qui est connu** : le fichier de reprise, le fichier de noms et la carte de la mémoire font foi. Chercher une adresse ou une routine par une recherche ciblée, pas en relisant tout le listing.
+- **Fichier de reprise court** (une page environ), toujours dans le même ordre : 1. état ; 2. commandes (construction, `check.sh`, lancement) ; 3. prochaine action exacte ; 4. pièges. Le détail (mesures, essais abandonnés, historique) va dans des documents à part qu'il cite.
 - **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le fichier de reprise, puis passer à une autre approche ou me poser la question si le choix me revient.
 - **Émulateur réel aux paliers seulement**, une fenêtre à la fois ; entre deux paliers, le simulateur suffit.
 

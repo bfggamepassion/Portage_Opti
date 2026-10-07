@@ -35,8 +35,8 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 - Un simulateur pilotable par script : touches scriptées, hasard rendu identique, saut à un niveau, sauvegarde et reprise d'état, adresses exécutées, mémoire relevée à chaque tour.
 - Avant toute mesure, vérifier le simulateur contre la vraie machine : un test qui contrôle la durée d'une trentaine d'instructions (dont les copies de blocs, les empilements, les entrées-sorties, les accès 16 bits en mémoire, les sauts pris et non pris) dans l'unité réelle de la machine, le nombre d'interruptions par trame et la durée d'une trame. Ce test reste dans le dépôt.
 - Vérifier que les parties scriptées jouent vraiment : identifier le mode de commande que le jeu lit (clavier, manette, touches redéfinies) et contrôler que le personnage bouge.
-- Préparer dès cette étape :
-  - la comparaison de logique tour par tour (original contre version modifiée), avec des parties au hasard reproductibles par une graine en plus du scénario fixe ; les traces de l'original sont calculées une fois et gardées (voir « Aller vite ») ;
+- Préparer les outils suivants **au moment où ils servent**, jamais après : chaque outil existe et est testé avant le premier changement qui en a besoin (la comparaison des écritures son avant de toucher au son, celle des écrans avant de toucher au rendu…). Ceux qu'exige l'étape 5 (simulateur vérifié, profileur, compteur d'images, sauvegardes de scènes chargées) se font en premier :
+  - la comparaison de logique tour par tour (original contre version modifiée), avec des parties au hasard reproductibles par une graine en plus du scénario fixe ; les traces de l'original sont calculées une fois et gardées (voir « Aller vite ») ; en cas d'écart, elle donne seule le diagnostic : premier tour différent, adresses en cause, instruction qui les a écrites de chaque côté, dernières routines appelées ;
   - la comparaison d'écrans octet par octet ;
   - la comparaison des écritures dans la puce sonore ;
   - la mesure de couverture : part des instructions du jeu exécutées par l'ensemble des essais, et liste des zones jamais exécutées ;
@@ -140,11 +140,16 @@ Pas de bavardage entre deux comptes rendus.
 ## Aller vite sans perdre en fiabilité
 
 - **Réutiliser avant d'écrire** : les kits et outils de `Portage_Opti` (skill `portage-retro`) et ceux déjà dans le dépôt. N'écrire un outil que s'il n'existe pas.
+- **Outils génériques séparés du jeu** : un outil qui ne dépend pas du jeu (processeur, puce vidéo ou son, format de disquette ou de cassette, banc de comparaison) est écrit sans rien de propre au jeu, dans son propre fichier, avec son test. À la fin, me proposer la liste de ceux qui méritent d'entrer dans `Portage_Opti` ; je valide l'ajout.
+- **Simulateur rapide** : mesurer sa vitesse dès qu'il tourne (tours de jeu par seconde) et la noter dans le fichier de reprise. S'il est trop lent pour les contrôles (contrôle rapide de plus de 2 minutes), l'accélérer avant de s'en servir : cœur rapide déjà disponible par pip (ex. simulateur en C de SkoolKit pour le Z80), PyPy, ou vrai émulateur piloté sans fenêtre par script.
+- **Rien à installer à la main** : tout outil supplémentaire (paquet, interpréteur, émulateur) est installé par un script du dépôt, sans compilateur ni manipulation de ma part. Si ce n'est pas possible, me proposer une autre solution.
 - **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
 - **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque niveau est atteint une fois en jouant, puis sa sauvegarde sert à tous les tests suivants.
 - **Construire et tester dans un dossier local**, hors du dossier synchronisé (Google Drive, OneDrive) : plus rapide et sans fichiers corrompus.
 - **Tests longs en tâche de fond**, avec leur progression ; travailler pendant ce temps, jamais d'attente active. Les tests indépendants se lancent en parallèle.
+- **Une seule commande de contrôle** : `sh check.sh rapide` et `sh check.sh complet`. Elle enchaîne construction et tests, s'arrête à la première erreur et rend un code d'échec ; c'est elle qu'on lance, toujours la même, notée dans le fichier de reprise. Ne jamais juger un résultat à travers `tail` ou une sortie tronquée.
 - **Ne pas relire ce qui est connu** : le fichier de reprise, le fichier de noms et la carte de la mémoire font foi. Chercher une adresse ou une routine par une recherche ciblée, pas en relisant tout le listing.
+- **Fichier de reprise court** (une page environ), toujours dans le même ordre : 1. état ; 2. commandes (construction, `check.sh`, lancement) ; 3. prochaine action exacte ; 4. pièges. Le détail (mesures, essais abandonnés, historique) va dans des documents à part qu'il cite.
 - **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le fichier de reprise, puis passer à une autre approche ou me poser la question si le choix me revient.
 - **Émulateur réel aux paliers seulement**, une fenêtre à la fois ; entre deux paliers, le simulateur suffit.
 
