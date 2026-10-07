@@ -19,7 +19,7 @@ Un simulateur ou un émulateur pilotable par script qui lance l'image de référ
 - relever la mémoire à chaque tour de jeu ;
 - noter les adresses exécutées.
 
-Prépare dès maintenant l'outil de comparaison qui servira pendant tout le portage : même partie scriptée sur l'original et sur le portage, mémoire du jeu comparée tour par tour.
+Prépare dès maintenant l'outil de comparaison qui servira pendant tout le portage : même partie scriptée sur l'original et sur le portage, mémoire du jeu comparée tour par tour. Il enregistre une fois pour toutes les traces de l'original par scénario (voir « Aller vite »), et le simulateur sait sauvegarder et recharger un état.
 
 ## 3. Listing et noms
 
@@ -57,7 +57,7 @@ Chaque livrable est vérifié par un test automatique qui passe, et ce test est 
 
 ## 7. Ne rien laisser en suspens
 
-Tout ce qui peut se faire avec les outils disponibles est fait avant de rendre la main : installer un outil manquant, simuler une deuxième machine (câble, deuxième joueur), atteindre chaque niveau en jouant plutôt qu'en le forçant, trancher une hypothèse qu'une trace ou une lecture du code permet de vérifier.
+Tout ce qui peut se faire avec les outils disponibles est fait avant de rendre la main : installer un outil manquant, simuler une deuxième machine (câble, deuxième joueur), atteindre chaque niveau en jouant plutôt qu'en le forçant (une fois, en gardant une sauvegarde d'état par niveau pour la suite), trancher une hypothèse qu'une trace ou une lecture du code permet de vérifier.
 
 Ne restent en suspens que les décisions qui me reviennent (machine cible, choix de jeu) ou ce qui est réellement impossible. Pour chacune, le fichier de reprise donne la raison précise.
 
@@ -69,5 +69,16 @@ Ne restent en suspens que les décisions qui me reviennent (machine cible, choix
 - le document « frontière du portage » avec la carte de la mémoire ;
 - le fichier de reprise ;
 - une rom / disque etc etc … recompilé à l'identique de ceux / celle que je t'ai fournit.
+
+## Aller vite sans perdre en fiabilité
+
+- **Réutiliser avant d'écrire** : les kits et outils de `Portage_Opti` (skill `portage-retro`) et ceux déjà dans le dépôt. N'écrire un outil que s'il n'existe pas.
+- **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
+- **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque niveau est atteint une fois en jouant, puis sa sauvegarde sert à tous les tests suivants.
+- **Construire et tester dans un dossier local**, hors du dossier synchronisé (Google Drive, OneDrive) : plus rapide et sans fichiers corrompus.
+- **Tests longs en tâche de fond**, avec leur progression ; travailler pendant ce temps, jamais d'attente active. Les tests indépendants se lancent en parallèle.
+- **Ne pas relire ce qui est connu** : le fichier de reprise, le fichier de noms et la carte de la mémoire font foi. Chercher une adresse ou une routine par une recherche ciblée, pas en relisant tout le listing.
+- **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le fichier de reprise, puis passer à une autre approche ou me poser la question si le choix me revient.
+- **Émulateur réel aux paliers seulement**, une fenêtre à la fois ; entre deux paliers, le simulateur suffit.
 
 NE SOIT PAS VERBEUX !! EXPLIQUE MOI CE QUE TU AS FAIT A LA TOUTE FIN.

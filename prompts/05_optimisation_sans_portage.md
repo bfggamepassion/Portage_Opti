@@ -36,7 +36,7 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
 - Avant toute mesure, vérifier le simulateur contre la vraie machine : un test qui contrôle la durée d'une trentaine d'instructions (dont les copies de blocs, les empilements, les entrées-sorties, les accès 16 bits en mémoire, les sauts pris et non pris) dans l'unité réelle de la machine, le nombre d'interruptions par trame et la durée d'une trame. Ce test reste dans le dépôt.
 - Vérifier que les parties scriptées jouent vraiment : identifier le mode de commande que le jeu lit (clavier, manette, touches redéfinies) et contrôler que le personnage bouge.
 - Préparer dès cette étape :
-  - la comparaison de logique tour par tour (original contre version modifiée), avec des parties au hasard reproductibles par une graine en plus du scénario fixe ;
+  - la comparaison de logique tour par tour (original contre version modifiée), avec des parties au hasard reproductibles par une graine en plus du scénario fixe ; les traces de l'original sont calculées une fois et gardées (voir « Aller vite ») ;
   - la comparaison d'écrans octet par octet ;
   - la comparaison des écritures dans la puce sonore ;
   - la mesure de couverture : part des instructions du jeu exécutées par l'ensemble des essais, et liste des zones jamais exécutées ;
@@ -55,7 +55,7 @@ Décisions qui me reviennent (à me poser au début, puis à chaque fois qu'une 
   - le code qui se modifie lui-même, y compris les opérandes écrits par une autre routine ;
   - les adresses écrites par le chargeur ou le menu (options de triche, redéfinition des touches) ;
   - les tables qui doivent rester à une adresse fixe et les segments pleins à l'octet.
-- Vérifier en déplaçant tout le code et en contrôlant que la logique reste identique. Donner la couverture atteinte par ce contrôle.
+- Vérifier en déplaçant tout le code et en contrôlant que la logique reste identique. Donner la couverture atteinte par ce contrôle. Ce contrôle complet se refait aux paliers ; entre deux, l'assemblage identique à l'original suffit.
 
 ## Étape 4 : frontière et carte de la mémoire (pour chaque programme)
 
@@ -136,5 +136,16 @@ Pas de bavardage entre deux comptes rendus.
 - disquette, ROM ou cassette de test à jour ;
 - rapport d'analyse (tableaux avant/après, plafond calculé) ;
 - fichier de reprise.
+
+## Aller vite sans perdre en fiabilité
+
+- **Réutiliser avant d'écrire** : les kits et outils de `Portage_Opti` (skill `portage-retro`) et ceux déjà dans le dépôt. N'écrire un outil que s'il n'existe pas.
+- **La référence de l'original se calcule une seule fois** : ses traces (mémoire par tour, écrans, écritures son) sont enregistrées par scénario avec le MD5 de l'image et du scénario. Les comparaisons ne refont tourner que la version modifiée ; la référence n'est recalculée que si l'image ou le scénario change.
+- **Sauvegardes d'état** : pour atteindre un niveau ou une scène, recharger une sauvegarde au lieu de rejouer la partie depuis le début. Chaque niveau est atteint une fois en jouant, puis sa sauvegarde sert à tous les tests suivants.
+- **Construire et tester dans un dossier local**, hors du dossier synchronisé (Google Drive, OneDrive) : plus rapide et sans fichiers corrompus.
+- **Tests longs en tâche de fond**, avec leur progression ; travailler pendant ce temps, jamais d'attente active. Les tests indépendants se lancent en parallèle.
+- **Ne pas relire ce qui est connu** : le fichier de reprise, le fichier de noms et la carte de la mémoire font foi. Chercher une adresse ou une routine par une recherche ciblée, pas en relisant tout le listing.
+- **Limiter chaque piste** : après deux essais sans résultat, noter la piste et ce qui a été essayé dans le fichier de reprise, puis passer à une autre approche ou me poser la question si le choix me revient.
+- **Émulateur réel aux paliers seulement**, une fenêtre à la fois ; entre deux paliers, le simulateur suffit.
 
 NE SOIT PAS VERBEUX !! EXPLIQUE MOI CE QUE TU AS FAIT A LA TOUTE FIN.
